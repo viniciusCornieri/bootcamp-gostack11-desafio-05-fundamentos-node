@@ -1,4 +1,4 @@
-import Transaction from '../models/Transaction';
+import Transaction, { TransactionType } from '../models/Transaction';
 
 interface Balance {
   income: number;
@@ -14,15 +14,28 @@ class TransactionsRepository {
   }
 
   public all(): Transaction[] {
-    // TODO
+    return this.transactions;
+  }
+
+  private getTransactionTypeSubtotal(type: TransactionType): number {
+    return this.transactions
+      .filter(transaction => transaction.type === type)
+      .map(transaction => transaction.value)
+      .reduce((total, value) => total + value, 0);
   }
 
   public getBalance(): Balance {
-    // TODO
+    const income = this.getTransactionTypeSubtotal(TransactionType.INCOME);
+    const outcome = this.getTransactionTypeSubtotal(TransactionType.OUTCOME);
+    const total = income - outcome;
+    return { income, outcome, total };
   }
 
-  public create(): Transaction {
-    // TODO
+  public create({ title, value, type }: Omit<Transaction, 'id'>): Transaction {
+    const transaction = new Transaction({ title, value, type });
+    this.transactions.push(transaction);
+
+    return transaction;
   }
 }
 
